@@ -325,19 +325,6 @@ The project includes comprehensive test coverage:
 - Output format tests
 - ChatGPT integration tests
 
-## Comparison with Python Version
-
-This Rust implementation closely matches the Python `youtube-transcript-api`:
-
-- ✅ Uses InnerTube API (same approach as Python)
-- ✅ Proper XML parsing with `quick-xml`
-- ✅ Comprehensive error handling
-- ✅ Consent cookie handling
-- ✅ Translation support
-- ✅ Manual vs generated transcript prioritization
-
-See [docs/COMPARISON.md](docs/COMPARISON.md) for detailed comparison.
-
 ## Limitations
 
 - Requires the video to have transcripts/captions available
@@ -357,4 +344,3 @@ MIT
 ## Links
 
 - [GitHub Repository](https://github.com/ljantzen/ytt)
-- [Python youtube-transcript-api](https://pypi.org/project/youtube-transcript-api/)
