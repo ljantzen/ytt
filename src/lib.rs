@@ -137,17 +137,36 @@ impl YouTubeTranscript {
 
     /// Extract video ID from YouTube URL
     pub fn extract_video_id(url_or_id: &str) -> Result<String> {
+        let input = url_or_id.trim();
+        
         // Check if it's already a video ID (11 characters)
-        if url_or_id.len() == 11
-            && url_or_id
+        if input.len() == 11
+            && input
                 .chars()
                 .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
         {
-            return Ok(url_or_id.to_string());
+            return Ok(input.to_string());
         }
 
-        let url = url::Url::parse(url_or_id)
-            .map_err(|_| TranscriptError::InvalidVideoId(url_or_id.to_string()))?;
+        // Try parsing as URL (with or without protocol)
+        let url_str = if input.starts_with("http://") || input.starts_with("https://") {
+            input.to_string()
+        } else if input.contains("youtube.com") || input.contains("youtu.be") {
+            format!("https://{}", input)
+        } else {
+            input.to_string()
+        };
+
+        let url = match url::Url::parse(&url_str) {
+            Ok(u) => u,
+            Err(_) => {
+                // If it's not a valid URL and not 11 chars, it's invalid
+                return Err(TranscriptError::InvalidVideoId(format!(
+                    "{} (YouTube video IDs must be 11 characters, or a valid YouTube URL)",
+                    url_or_id
+                )));
+            }
+        };
 
         if url
             .host_str()
@@ -160,17 +179,48 @@ impl YouTubeTranscript {
                 .find(|(k, _)| k == "v")
                 .map(|(_, v)| v.to_string())
             {
-                return Ok(video_id);
+                // Validate extracted ID is 11 characters
+                if video_id.len() == 11
+                    && video_id
+                        .chars()
+                        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                {
+                    return Ok(video_id);
+                }
             }
             // Short URL: youtu.be/VIDEO_ID
             if url.host_str().map(|h| h == "youtu.be").unwrap_or(false) {
                 if let Some(video_id) = url.path_segments().and_then(|mut s| s.next()) {
-                    return Ok(video_id.to_string());
+                    // Validate extracted ID is 11 characters
+                    if video_id.len() == 11
+                        && video_id
+                            .chars()
+                            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                    {
+                        return Ok(video_id.to_string());
+                    }
+                }
+            }
+            // Embed URL: youtube.com/embed/VIDEO_ID
+            if let Some(segments) = url.path_segments() {
+                let segments: Vec<&str> = segments.collect();
+                if segments.len() >= 2 && segments[0] == "embed" {
+                    let video_id = segments[1];
+                    if video_id.len() == 11
+                        && video_id
+                            .chars()
+                            .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                    {
+                        return Ok(video_id.to_string());
+                    }
                 }
             }
         }
 
-        Err(TranscriptError::InvalidVideoId(url_or_id.to_string()))
+        Err(TranscriptError::InvalidVideoId(format!(
+            "{} (YouTube video IDs must be 11 characters, or a valid YouTube URL)",
+            url_or_id
+        )))
     }
 
     /// List all available transcripts for a video
@@ -620,6 +670,14 @@ mod tests {
         assert_eq!(
             YouTubeTranscript::extract_video_id("https://youtu.be/dQw4w9WgXcQ").unwrap(),
             "dQw4w9WgXcQ"
+        );
+    }
+
+    #[test]
+    fn test_extract_video_id_short_url_with_query() {
+        assert_eq!(
+            YouTubeTranscript::extract_video_id("https://youtu.be/_NuH3D4SN-c?si=VSFea_rMwtaiR8Q7").unwrap(),
+            "_NuH3D4SN-c"
         );
     }
 
