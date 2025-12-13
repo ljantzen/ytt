@@ -28,8 +28,25 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@5d458579430fc14a04a08a1e7d3694f545e91ce6 # ratchet:dtolnay/rust-toolchain@stable
 
-      - name: Build binary
+      - name: Install musl target (Linux)
+        if: runner.os == 'Linux'
+        run: rustup target add x86_64-unknown-linux-musl
+
+      - name: Build binary (Windows)
+        if: runner.os == 'Windows'
         run: cargo build --release
+
+      - name: Build binary (macOS)
+        if: runner.os == 'macOS'
+        run: cargo build --release
+
+      - name: Build GNU binary (Linux)
+        if: runner.os == 'Linux'
+        run: cargo build --release
+
+      - name: Build musl binary (Linux)
+        if: runner.os == 'Linux'
+        run: cargo build --release --target x86_64-unknown-linux-musl
 
       - name: Package binary (Windows)
         if: runner.os == 'Windows'
@@ -40,13 +57,31 @@ jobs:
           Compress-Archive -Path ytt.exe -DestinationPath ytt-windows-latest.zip
         shell: pwsh
 
-      - name: Package binary (Unix)
-        if: runner.os != 'Windows'
+      - name: Package binary (macOS)
+        if: runner.os == 'macOS'
         run: |
           mkdir -p dist
           cp target/release/ytt dist/ytt
           cd dist
-          tar -czvf ytt-${{ runner.os }}.tar.gz ytt
+          tar -czvf ytt-macos-latest.tar.gz ytt
+        shell: bash
+
+      - name: Package GNU binary (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p dist
+          cp target/release/ytt dist/ytt
+          cd dist
+          tar -czvf ytt-linux-x86_64.tar.gz ytt
+        shell: bash
+
+      - name: Package musl binary (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p dist
+          cp target/x86_64-unknown-linux-musl/release/ytt dist/ytt
+          cd dist
+          tar -czvf ytt-linux-x86_64-musl.tar.gz ytt
         shell: bash
 
       - name: Create GitHub Release and Upload Assets

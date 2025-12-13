@@ -1,13 +1,13 @@
 [package]
 name = "ytt"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 authors = ["Your Name <you@example.com>"]
 description = "A Rust implementation of YouTube Transcript API"
 license = "MIT"
 
 [dependencies]
-reqwest = { version = "0.11", features = ["json", "cookies"] }
+reqwest = { version = "0.11", features = ["json", "cookies", "rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1", features = ["full"] }
