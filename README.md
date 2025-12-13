@@ -1,6 +1,6 @@
 # ytt - YouTube Transcript API (Rust)
 
-A Rust implementation of the YouTube Transcript API, similar to the Python [youtube-transcript-api](https://pypi.org/project/youtube-transcript-api/) package.
+A Rust implementation of the YouTube Transcript API
 
 ## Features
 
