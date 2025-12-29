@@ -16,7 +16,7 @@ clap = { version = "4", features = ["derive"] }
 url = "2.5"
 quick-xml = { version = "0.31", features = ["serialize"] }
 regex = "1.10"
-thiserror = "1.0"
+thiserror = "2.0"
 
 [dev-dependencies]
 tempfile = "3.10"
