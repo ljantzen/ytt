@@ -7,7 +7,7 @@ description = "A Rust implementation of YouTube Transcript API"
 license = "MIT"
 
 [dependencies]
-reqwest = { version = "0.12", features = ["json", "cookies", "rustls-tls"], default-features = false }
+reqwest = { version = "0.13", features = ["json", "cookies", "rustls-tls"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1", features = ["full"] }
