@@ -15,7 +15,6 @@ impl TranscriptParser {
 
     pub fn parse(&self, xml: &str) -> Result<Vec<crate::TranscriptItem>, String> {
         let mut reader = Reader::from_str(xml);
-        reader.trim_text(true);
 
         let mut items = Vec::new();
         let mut buf = Vec::new();
@@ -85,8 +84,8 @@ impl TranscriptParser {
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Text(e)) => {
                     let decoded = html_escape::decode_html_entities(
-                        e.unescape()
-                            .map_err(|e| format!("Failed to unescape: {}", e))?
+                        e.decode()
+                            .map_err(|e| format!("Failed to decode: {}", e))?
                             .as_ref(),
                     );
                     text.push_str(&decoded);
@@ -158,8 +157,8 @@ impl TranscriptParser {
             match reader.read_event_into(&mut buf) {
                 Ok(Event::Text(e)) => {
                     let decoded = html_escape::decode_html_entities(
-                        e.unescape()
-                            .map_err(|e| format!("Failed to unescape: {}", e))?
+                        e.decode()
+                            .map_err(|e| format!("Failed to decode: {}", e))?
                             .as_ref(),
                     );
                     text.push_str(&decoded);
